@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Conference Day 🔥</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:      #0a0a0f;
+      --navy:       #0d1b3e;
+      --navy-mid:   #1a2a5e;
+      --royal:      #3a1d8a;
+      --purple-mid: #5b2d99;
+      --purple-glow:#7b3fc4;
+      --gold:       #c9a84c;
+      --gold-light: #e8c96e;
+      --white:      #f5f0ff;
+      --white-dim:  rgba(245,240,255,0.7);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      opacity: 0.4;
+    }
+
+    /* ── STARFIELD ── */
+    .stars {
+      position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+    }
+    .star {
+      position: absolute;
+      width: 2px; height: 2px;
+      border-radius: 50%;
+      background: var(--white);
+      opacity: 0;
+      animation: twinkle var(--dur, 4s) var(--delay, 0s) infinite ease-in-out;
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0; transform: scale(0.5); }
+      50%       { opacity: var(--bright, 0.6); transform: scale(1.2); }
+    }
+
+    /* ── SECTIONS ── */
+    section { position: relative; z-index: 1; }
+
+    /* ─────────────────────────────────────────────
+       SECTION 1 — INTRO VIDEO
+    ───────────────────────────────────────────── */
+    #intro {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      background: linear-gradient(160deg, var(--black) 0%, var(--navy) 50%, var(--royal) 100%);
+      overflow: hidden;
+    }
+
+    #intro::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 80%, rgba(122,63,196,0.25) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .intro-eyebrow {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.8rem;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.3s forwards;
+    }
+
+    .intro-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.8rem, 8vw, 6.5rem);
+      font-weight: 300;
+      line-height: 1.05;
+      text-align: center;
+      letter-spacing: -0.01em;
+      color: var(--white);
+      opacity: 0;
+      animation: fadeUp 0.9s 0.5s forwards;
+      margin-bottom: 0.4rem;
+    }
+    .intro-title em {
+      font-style: italic;
+      color: var(--gold-light);
+    }
+
+    .intro-sub {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: clamp(1rem, 2.5vw, 1.4rem);
+      color: var(--white-dim);
+      text-align: center;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.7s forwards;
+      margin-bottom: 3rem;
+    }
+
+    .video-frame {
+      position: relative;
+      width: min(85vw, 420px);
+      aspect-ratio: 9/16;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 0 0 1px rgba(201,168,76,0.2),
+                  0 30px 80px rgba(0,0,0,0.7),
+                  0 0 60px rgba(122,63,196,0.3);
+      opacity: 0;
+      animation: fadeUp 1s 0.9s forwards;
+    }
+
+    /* fallback for portrait clips that are 16:9 wide */
+    .video-frame.wide-video {
+      aspect-ratio: 16/9;
+    }
+
+    .video-frame video {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+
+    .video-border {
+      position: absolute; inset: 0;
+      border-radius: 24px;
+      border: 1px solid rgba(201,168,76,0.3);
+      pointer-events: none;
+    }
+
+    .scroll-cue {
+      position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+      opacity: 0;
+      animation: fadeIn 1s 2s forwards;
+      cursor: pointer;
+    }
+    .scroll-cue span {
+      font-size: 0.6rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+    .scroll-cue .arrow {
+      width: 18px; height: 18px;
+      border-right: 1.5px solid var(--gold);
+      border-bottom: 1.5px solid var(--gold);
+      transform: rotate(45deg);
+      animation: bounce 1.5s infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: rotate(45deg) translateY(0); }
+      50%       { transform: rotate(45deg) translateY(5px); }
+    }
+
+    /* ─────────────────────────────────────────────
+       SECTION 2 — MESSAGE
+    ───────────────────────────────────────────── */
+    #message {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 5rem 2rem;
+      background: linear-gradient(180deg, var(--navy) 0%, var(--navy-mid) 40%, var(--royal) 100%);
+      overflow: hidden;
+    }
+
+    .message-inner {
+      max-width: 720px;
+      text-align: center;
+    }
+
+    .divider {
+      display: flex; align-items: center; gap: 1rem;
+      margin: 0 auto 3rem;
+      width: min(300px, 80vw);
+    }
+    .divider-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+    .divider-gem {
+      width: 6px; height: 6px;
+      background: var(--gold);
+      transform: rotate(45deg);
+      flex-shrink: 0;
+    }
+
+    .message-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.6rem;
+      display: block;
+    }
+
+    .message-headline {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 2rem;
+      color: var(--white);
+    }
+    .message-headline .italic { font-style: italic; color: var(--gold-light); }
+
+    .message-body {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.15rem, 2.2vw, 1.45rem);
+      line-height: 1.85;
+      color: var(--white-dim);
+      margin-bottom: 2.5rem;
+    }
+
+    .message-body strong {
+      color: var(--white);
+      font-weight: 400;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 0.55rem 1.6rem;
+      border: 1px solid rgba(201,168,76,0.5);
+      border-radius: 100px;
+      font-size: 0.75rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold-light);
+      background: rgba(201,168,76,0.06);
+    }
+
+    /* ─────────────────────────────────────────────
+       SECTION 3 — SLIDESHOW
+    ───────────────────────────────────────────── */
+    #gallery {
+      min-height: 100vh;
+      background: linear-gradient(180deg, var(--royal) 0%, var(--purple-mid) 40%, var(--black) 100%);
+      padding: 5rem 2rem;
+      display: flex; flex-direction: column; align-items: center;
+      overflow: hidden;
+    }
+
+    .gallery-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+    .gallery-header h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 300;
+      color: var(--white);
+    }
+    .gallery-header h2 em {
+      font-style: italic;
+      color: var(--gold-light);
+    }
+
+    /* Slideshow container */
+    .slideshow {
+      position: relative;
+      width: min(90vw, 520px);
+      aspect-ratio: 4/5;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 50px rgba(91,45,153,0.35);
+      margin-bottom: 2rem;
+    }
+
+    .slide {
+      position: absolute; inset: 0;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+    .slide.active { opacity: 1; }
+
+    .slide video,
+    .slide img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+
+    .slide-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(10,10,15,0.6) 0%, transparent 50%);
+    }
+
+    .slide-caption {
+      position: absolute;
+      bottom: 1.5rem; left: 1.5rem; right: 1.5rem;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 1.05rem;
+      color: var(--white);
+      opacity: 0;
+      transition: opacity 0.5s 0.4s;
+      text-shadow: 0 1px 8px rgba(0,0,0,0.7);
+    }
+    .slide.active .slide-caption { opacity: 1; }
+
+    /* Dot navigation */
+    .slide-dots {
+      display: flex; gap: 0.5rem; justify-content: center;
+      margin-bottom: 3.5rem;
+    }
+    .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: rgba(245,240,255,0.25);
+      border: none; cursor: pointer; padding: 0;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .dot.active {
+      background: var(--gold);
+      transform: scale(1.4);
+    }
+
+    /* Controls */
+    .slide-controls {
+      display: flex; gap: 1rem;
+    }
+    .ctrl-btn {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      border: 1px solid rgba(201,168,76,0.4);
+      background: rgba(10,10,15,0.4);
+      color: var(--gold);
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .ctrl-btn:hover {
+      background: rgba(201,168,76,0.12);
+      border-color: var(--gold);
+    }
+
+    /* ─────────────────────────────────────────────
+       SECTION 4 — FINALE
+    ───────────────────────────────────────────── */
+    #finale {
+      min-height: 100vh;
+      background: var(--black);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 5rem 2rem;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #finale::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 50%, rgba(58,29,138,0.4) 0%, transparent 70%);
+    }
+
+    .finale-photo-wrap {
+      position: relative; z-index: 1;
+      width: min(75vw, 380px);
+      margin-bottom: 3rem;
+    }
+    .finale-photo-wrap img {
+      width: 100%;
+      border-radius: 20px;
+      display: block;
+      box-shadow: 0 30px 90px rgba(0,0,0,0.7),
+                  0 0 60px rgba(91,45,153,0.4),
+                  0 0 0 1px rgba(201,168,76,0.2);
+    }
+    .finale-photo-wrap::after {
+      content: '';
+      position: absolute; inset: -2px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, var(--gold) 0%, transparent 40%, var(--purple-glow) 100%);
+      z-index: -1;
+      opacity: 0.5;
+    }
+
+    .finale-text {
+      position: relative; z-index: 1;
+      text-align: center;
+      max-width: 560px;
+    }
+
+    .finale-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.45em;
+      text-transform: uppercase;
+      color: var(--gold);
+      display: block;
+      margin-bottom: 1.2rem;
+    }
+
+    .finale-headline {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
+      font-weight: 700;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--gold-light) 0%, var(--white) 50%, var(--purple-glow) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1.2rem;
+    }
+
+    .finale-sub {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      color: var(--white-dim);
+      line-height: 1.8;
+    }
+
+    .finale-emoji {
+      display: block;
+      font-size: 2rem;
+      margin-top: 1.5rem;
+      animation: heartbeat 1.5s infinite;
+    }
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      14%       { transform: scale(1.25); }
+      28%       { transform: scale(1); }
+      42%       { transform: scale(1.15); }
+      56%       { transform: scale(1); }
+    }
+
+    /* ── SHARED ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    /* Scroll-triggered reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.9s ease, transform 0.9s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Stagger children */
+    .stagger .reveal:nth-child(1) { transition-delay: 0s; }
+    .stagger .reveal:nth-child(2) { transition-delay: 0.12s; }
+    .stagger .reveal:nth-child(3) { transition-delay: 0.24s; }
+    .stagger .reveal:nth-child(4) { transition-delay: 0.36s; }
+    .stagger .reveal:nth-child(5) { transition-delay: 0.48s; }
+
+    /* ── MOBILE ── */
+    @media (max-width: 500px) {
+      .video-frame { width: 88vw; }
+      .slideshow   { width: 90vw; }
+    }
+
+    /* prefers-reduced-motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Starfield -->
+<div class="stars" id="stars"></div>
+
+<!-- ══════════════════════════════════════
+     SECTION 1 — INTRO
+══════════════════════════════════════ -->
+<section id="intro">
+  <p class="intro-eyebrow">✦ Today is the day ✦</p>
+  <h1 class="intro-title">Conference Day,<br><em>We Ready.</em></h1>
+  <p class="intro-sub">This one's for you.</p>
+
+  <div class="video-frame" id="introFrame">
+    <video autoplay muted playsinline loop preload="auto" poster="pic1.jpg">
+      <source src="vid1.mp4" type="video/mp4" />
+    </video>
+    <div class="video-border"></div>
+  </div>
+
+  <div class="scroll-cue" onclick="document.getElementById('message').scrollIntoView({behavior:'smooth'})">
+    <span>Keep going</span>
+    <div class="arrow"></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION 2 — HEARTFELT MESSAGE
+══════════════════════════════════════ -->
+<section id="message">
+  <div class="message-inner stagger">
+    <div class="divider reveal">
+      <div class="divider-line"></div>
+      <div class="divider-gem"></div>
+      <div class="divider-line"></div>
+    </div>
+
+    <span class="message-label reveal">A word before you walk in</span>
+
+    <h2 class="message-headline reveal">
+      You didn't come this far<br>
+      to come <span class="italic">this</span> far.
+    </h2>
+
+    <p class="message-body reveal">
+      Every late night, every doubt you pushed through —
+      it all led to <strong>this room, this moment, this version of you.</strong>
+      Walk in knowing that the people in there are about to see something special.
+      Not because you're dressed well and looking edible (though, let's be honest… you are),
+      but because you've <strong>earned every seat at every table.</strong>
+      <br /><br />
+      Today isn't a test. It's a stage. And you were made for stages.
+      Go in there and remind them why you're the one they should remember.
+    </p>
+
+    <div class="reveal">
+      <span class="pill">✦ &nbsp; You've got this &nbsp; ✦</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION 3 — GALLERY / SLIDESHOW
+══════════════════════════════════════ -->
+<section id="gallery">
+  <div class="gallery-header reveal">
+    <p style="font-size:0.65rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;">The evidence</p>
+    <h2>Look at you <em>you're all that</em><br>and much more.</h2>
+  </div>
+
+  <div class="slideshow" id="slideshow">
+
+    <!-- Slide 1 — video -->
+    <div class="slide active" data-type="video">
+      <video muted playsinline loop>
+        <source src="vid2.mp4" type="video/mp4" />
+      </video>
+      <div class="slide-overlay"></div>
+      <p class="slide-caption">This energy? Completely unmatched.</p>
+    </div>
+
+    <!-- Slide 2 — video -->
+    <div class="slide" data-type="video">
+      <video muted playsinline loop>
+        <source src="vid3.mp4" type="video/mp4" />
+      </video>
+      <div class="slide-overlay"></div>
+      <p class="slide-caption">The confidence is very much giving.</p>
+    </div>
+
+    <!-- Slide 3 — video -->
+    <div class="slide" data-type="video">
+      <video muted playsinline loop>
+        <source src="vid4.mp4" type="video/mp4" />
+      </video>
+      <div class="slide-overlay"></div>
+      <p class="slide-caption">Built different, and you know it.As you say made from carbon they call it melanin!!</p>
+    </div>
+
+    <!-- Slide 4 — video -->
+    <div class="slide" data-type="video">
+      <video muted playsinline loop>
+        <source src="vid5.mp4" type="video/mp4" />
+      </video>
+      <div class="slide-overlay"></div>
+      <p class="slide-caption">Every room is yours when you walk in like this.</p>
+    </div>
+
+    <!-- Slide 5 — photo (sunglasses shot) -->
+    <div class="slide" data-type="image">
+      <img src="pic1.jpg" alt="Conference ready" loading="lazy" />
+      <div class="slide-overlay"></div>
+      <p class="slide-caption">The smile that closes creates a memory worth keeping.</p>
+    </div>
+
+  </div>
+
+  <!-- Dots -->
+  <div class="slide-dots" id="slideDots"></div>
+
+  <!-- Controls -->
+  <div class="slide-controls">
+    <button class="ctrl-btn" id="prevBtn" aria-label="Previous">&#8592;</button>
+    <button class="ctrl-btn" id="nextBtn" aria-label="Next">&#8594;</button>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION 4 — FINALE
+══════════════════════════════════════ -->
+<section id="finale">
+  <div class="finale-photo-wrap reveal">
+    <img src="pic2.jpg" alt="You are the shit" />
+  </div>
+
+  <div class="finale-text reveal">
+    <span class="finale-label">Final verdict</span>
+    <h2 class="finale-headline">You're the SHIT!!.</h2>
+    <p class="finale-sub">
+      They are <em style="color:var(--gold-light);">not</em> ready for you.<br />
+      But that's their problem!
+      <em style="color:var(--gold-light);">I love you youve got this❤️.</em>
+    </p>
+    <span class="finale-emoji">❤️👑</span>
+  </div>
+</section>
+
+<script>
+  /* ── STARS ── */
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 120; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.cssText = `
+      left:${Math.random()*100}%;
+      top:${Math.random()*100}%;
+      --dur:${3+Math.random()*4}s;
+      --delay:${Math.random()*5}s;
+      --bright:${0.3+Math.random()*0.6};
+    `;
+    starsEl.appendChild(s);
+  }
+
+  /* ── INTRO VIDEO: detect portrait vs landscape and force a reliable start ── */
+  const introVid = document.querySelector('#introFrame video');
+  const introFrame = document.getElementById('introFrame');
+
+  function startIntroVideo() {
+    if (!introVid) return;
+    introVid.muted = true;
+    introVid.playsInline = true;
+    introVid.play().catch(() => {});
+  }
+
+  introVid.addEventListener('loadedmetadata', () => {
+    if (introVid.videoWidth > introVid.videoHeight) {
+      introFrame.classList.add('wide-video');
+    }
+    startIntroVideo();
+  });
+
+  introVid.addEventListener('canplay', startIntroVideo);
+  window.addEventListener('load', startIntroVideo);
+
+  /* ── SLIDESHOW ── */
+  const slides  = Array.from(document.querySelectorAll('.slide'));
+  const dotsWrap = document.getElementById('slideDots');
+  let current = 0;
+  let autoTimer;
+
+  // build dots
+  slides.forEach((_, i) => {
+    const d = document.createElement('button');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.setAttribute('aria-label', `Slide ${i+1}`);
+    d.addEventListener('click', () => goTo(i));
+    dotsWrap.appendChild(d);
+  });
+  const dots = Array.from(dotsWrap.querySelectorAll('.dot'));
+
+  function goTo(idx) {
+    const prev = slides[current];
+    // pause video on leaving slide
+    const prevVid = prev.querySelector('video');
+    if (prevVid) prevVid.pause();
+
+    slides[current].classList.remove('active');
+    dots[current].classList.remove('active');
+    current = (idx + slides.length) % slides.length;
+    slides[current].classList.add('active');
+    dots[current].classList.add('active');
+
+    // play video on entering slide
+    const nextVid = slides[current].querySelector('video');
+    if (nextVid) nextVid.play().catch(()=>{});
+
+    resetAuto();
+  }
+
+  function resetAuto() {
+    clearInterval(autoTimer);
+    autoTimer = setInterval(() => goTo(current + 1), 5000);
+  }
+
+  document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+  document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+
+  // Start auto-play
+  resetAuto();
+
+  // Swipe support
+  let touchStartX = 0;
+  document.getElementById('slideshow').addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, {passive:true});
+  document.getElementById('slideshow').addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 40) goTo(dx < 0 ? current + 1 : current - 1);
+  }, {passive:true});
+
+  /* ── SCROLL REVEALS ── */
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
